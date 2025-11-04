@@ -1,0 +1,10 @@
+🚀 Running scenario: /Users/delvisecheverria/Documents/pulse/uploads/upload_1762279807_recorded_2025-11-04_121255.pulse.yaml
+🚀 Running scenario: Recorded Session
+Concurrency: 1 | Duration: 10s
+
+--- RESULTS ---
+Total Requests: 40
+Failures: 0
+Average Latency: 255.110593ms
+P95 Latency: 68.519917ms
+----------------

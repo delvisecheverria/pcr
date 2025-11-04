@@ -1,0 +1,7 @@
+{
+  "ended_at": "2025-11-04T14:21:33.740625-05:00",
+  "ok": true,
+  "output": "🚀 Running scenario: Recorded Session\nConcurrency: 2 | Duration: 10s\n\n--- PER REQUEST METRICS ---\nRequest                        Count      Fails      Err(%)     Avg(ms)    P90(ms)    P95(ms)   \nGET /demo/index.php?main_page=login 14         0          0.00       286.97     358.19     456.57    \nPOST /demo/index.php?main_page=login\u0026action=process 14         0          0.00       450.59     562.75     582.61    \nGET /demo                      14         0          0.00       397.69     500.70     565.27    \nGET /demo/                     14         0          0.00       298.93     401.28     407.91    \nGET /demo/includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js 14         0          0.00       72.06      73.64      114.39    \n\n--- RESULTS ---\nTotal Requests: 70\nFailures: 0\nAverage Latency: 301.25ms\nP95 Latency: 551.54ms\n----------------\n",
+  "started_at": "2025-11-04T14:21:22.87055-05:00",
+  "yaml_file": "upload_1762284082_totest.yaml"
+}

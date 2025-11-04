@@ -1,0 +1,9 @@
+🚀 Running scenario: Recorded Session
+Concurrency: 2 | Duration: 10s
+
+--- RESULTS ---
+Total Requests: 80
+Failures: 0
+Average Latency: 265.609988ms
+P95 Latency: 72.359959ms
+----------------

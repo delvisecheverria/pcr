@@ -1,0 +1,7 @@
+{
+  "ended_at": "2025-11-04T14:20:15.252473-05:00",
+  "ok": true,
+  "output": "🚀 Running scenario: Recorded Session\nConcurrency: 2 | Duration: 10s\n\n--- PER REQUEST METRICS ---\nRequest                        Count      Fails      Err(%)     Avg(ms)    P90(ms)    P95(ms)   \nGET /demo                      14         0          0.00       378.77     478.69     497.00    \nGET /demo/                     14         0          0.00       310.31     388.17     463.11    \nGET /demo/includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js 14         0          0.00       80.19      134.89     155.53    \n",
+  "started_at": "2025-11-04T14:20:04.225128-05:00",
+  "yaml_file": "upload_1762284004_totest.yaml"
+}

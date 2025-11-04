@@ -1,0 +1,118 @@
+name: from_jmx_Demostracion_5
+concurrency: 10
+duration: 60s
+steps:
+- name: HomePage/-217
+  method: GET
+  url: http://automationpractice.com/
+- name: HomePage/index.php-218
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sing In/index.php-219
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sing In/index.php-220
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: User and Pass/index.php?controller=authentication-221
+  method: POST
+  url: http://automationpractice.com/index.php?controller=authentication
+- name: User and Pass/index.php-222
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Select Category “Woman”/index.php-223
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Select Product/index.php?rand=1590505730794-224
+  method: POST
+  url: http://automationpractice.com/index.php?rand=1590505730794
+- name: Click "Proceed to checkout" /index.php-226
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click 2nd on "Proceed to checkout"/index.php-227
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click 3th on "Proceed to checkout"/index.php?controller=order-228
+  method: POST
+  url: http://automationpractice.com/index.php?controller=order
+- name: Select Term and Click on  "Proceed to checkout" /index.php?controller=order&multi-shipping=-231
+  method: POST
+  url: http://automationpractice.com/index.php?controller=order&multi-shipping=
+- name: Select “Pay by Bank wire”/index.php-232
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click on “I confirm my Order”/index.php?fc=module&module=bankwire&controller=validation-233
+  method: POST
+  url: http://automationpractice.com/index.php?fc=module&module=bankwire&controller=validation
+- name: Click on “I confirm my Order”/index.php-234
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-235
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-236
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-237
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-238
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: HomePage/-1
+  method: GET
+  url: http://automationpractice.com/
+- name: HomePage/index.php-2
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sing In/index.php-3
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sing In/index.php-4
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: User and Pass/index.php?controller=authentication-5
+  method: POST
+  url: http://automationpractice.com/index.php?controller=authentication
+- name: User and Pass/index.php-6
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Select Category “Woman”/index.php-7
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Select Product/index.php?rand=1590943789613-8
+  method: POST
+  url: http://automationpractice.com/index.php?rand=1590943789613
+- name: Click "Proceed to checkout"/index.php-9
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click 2nd on "Proceed to checkout" /index.php-10
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click 3th on "Proceed to checkout"/index.php?controller=order-11
+  method: POST
+  url: http://automationpractice.com/index.php?controller=order
+- name: Select Term and Click on  "Proceed to checkout" /index.php?controller=order&multi-shipping=-12
+  method: POST
+  url: http://automationpractice.com/index.php?controller=order&multi-shipping=
+- name: Select “Pay by Bank wire” /index.php-13
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click on “I confirm my Order”/index.php?fc=module&module=bankwire&controller=validation-14
+  method: POST
+  url: http://automationpractice.com/index.php?fc=module&module=bankwire&controller=validation
+- name: Click on “I confirm my Order”/index.php-15
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-16
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-17
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-18
+  method: GET
+  url: http://automationpractice.com/index.php
+- name: Click Sign out/index.php-19
+  method: GET
+  url: http://automationpractice.com/index.php

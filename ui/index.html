@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulse Web UI</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Tema de highlight.js -->
+  <link id="hljs-theme" rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" />
+</head>
+<body>
+  <header>
+    <h1>⚡ Pulse Web UI</h1>
+  </header>
+
+  <main>
+    <!-- 🎛 Toolbar -->
+    <section class="toolbar">
+      <button id="start" class="primary">▶️ Start Recorder</button>
+      <button id="stop" class="danger" disabled>🛑 Stop Recorder</button>
+      <button id="status" class="secondary">📡 Check Status</button>
+    </section>
+
+    <!-- 🟢 Status -->
+    <div id="status-bar">
+      <span class="status-indicator" id="indicator"></span>
+      <span id="status-text">Idle</span>
+    </div>
+
+    <!-- 📡 Recorded Requests -->
+    <section id="recorded-requests">
+      <h2>📋 Recorded Requests</h2>
+
+      <!-- Split view / grid container -->
+      <div class="requests-container">
+        <!-- Left side: list -->
+        <div id="requests-list" class="requests-list"></div>
+
+        <!-- Right side: details -->
+        <div id="request-detail" class="request-detail hidden">
+          <!-- Encabezado del request -->
+          <div class="request-header">
+            <div><strong>Protocol:</strong> <span id="req-protocol">-</span></div>
+            <div><strong>Server:</strong> <span id="req-server">-</span></div>
+            <div><strong>Port:</strong> <span id="req-port">-</span></div>
+            <div><strong>Method:</strong> <span id="req-method">-</span></div>
+            <div><strong>Path:</strong> <span id="req-path">-</span></div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab active" data-tab="headers">Headers</button>
+            <button class="tab" data-tab="body">Body</button>
+            <button class="tab" data-tab="response">Response</button>
+            <button class="tab" data-tab="meta">Meta</button>
+          </div>
+
+          <!-- Contenido de tabs -->
+          <pre class="tab-content" id="headers"></pre>
+          <pre class="tab-content hidden" id="body"></pre>
+          <pre class="tab-content hidden" id="response"></pre>
+          <pre class="tab-content hidden" id="meta"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🧠 Log Console -->
+    <section id="logs">
+      <h2>🧠 Log Console</h2>
+      <pre id="log">[--] Pulse UI initializing...\n</pre>
+    </section>
+
+    <!-- 💾 Saved Recordings -->
+    <section id="recordings">
+      <h2>💾 Saved Recordings</h2>
+      <button id="refresh-recordings" class="secondary">🔄 Refresh List</button>
+      <ul id="recordings-list"></ul>
+    </section>
+
+    <!-- 🧾 YAML Preview Modal -->
+    <div id="yaml-modal" class="modal hidden">
+      <div class="modal-content">
+        <button id="close-modal" class="close-btn">✖</button>
+        <h3 id="yaml-title">YAML Preview</h3>
+        <div class="modal-actions">
+          <button id="download-yaml" class="download-btn">⬇️ Download</button>
+        </div>
+        <pre id="yaml-content">Loading...</pre>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    ⚡ Pulse Load Testing — Built with Go &amp; Love 💚
+    <label class="toggle">
+      🌞 <input type="checkbox" id="theme-toggle" /> 🌙
+    </label>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+
+  <script>
+    hljs.configure({ ignoreUnescapedHTML: true });
+
+    // Sincroniza el tema de highlight.js con el modo oscuro
+    (function syncHljsTheme() {
+      const themeLink = document.getElementById('hljs-theme');
+      const toggle = document.getElementById('theme-toggle');
+
+      function applyTheme(isDark) {
+        themeLink.href = isDark
+          ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+          : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+      }
+
+      const isDark = localStorage.getItem('pulse-theme') === 'dark';
+      toggle.checked = isDark;
+      applyTheme(isDark);
+
+      toggle.addEventListener('change', (e) => {
+        applyTheme(e.target.checked);
+        localStorage.setItem('pulse-theme', e.target.checked ? 'dark' : 'light');
+      });
+    })();
+  </script>
+</body>
+</html>

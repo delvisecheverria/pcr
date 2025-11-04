@@ -1,0 +1,165 @@
+concurrency: 1
+duration: 5s
+name: recorded_session
+steps:
+  - headers:
+      Accept: '*/*'
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Cache-Control: no-cache
+      Connection: keep-alive
+      Pragma: no-cache
+      Priority: u=4
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 01_GET_detectportal.firefox.com
+    url: http://detectportal.firefox.com/success.txt?ipv6
+  - headers:
+      Accept: '*/*'
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Cache-Control: no-cache
+      Connection: keep-alive
+      Pragma: no-cache
+      Priority: u=4
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 02_GET_detectportal.firefox.com
+    url: http://detectportal.firefox.com/success.txt?ipv4
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 03_GET_testingyes.com
+    url: http://testingyes.com/demo/
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/css,*/*;q=0.1
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=2
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 04_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/css/stylesheet.css
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/css,*/*;q=0.1
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=2
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 05_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/css/stylesheet_css_buttons.css
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/css,*/*;q=0.1
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=2
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 06_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/css/stylesheet_colors.css
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/css,*/*;q=0.1
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=2
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 07_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/css/responsive.css
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/css,*/*;q=0.1
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=2
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 08_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/css/responsive_default.css
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: '*/*'
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+      Priority: u=2
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 09_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/css,*/*;q=0.1
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+      Priority: u=4
+      Referer: http://testingyes.com/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 10_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/css/print_stylesheet.css
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Referer: http://testingyes.com/
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 11_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/index.php?main_page=login

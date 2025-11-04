@@ -1,0 +1,131 @@
+concurrency: 1
+duration: 5s
+name: recorded_session
+steps:
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 01_GET_testingyes.com
+    url: http://testingyes.com/demo/
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Referer: http://testingyes.com/
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 02_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/index.php?main_page=login
+  - body: securityToken=5438a9a98c3e03f0e14f6974ea5784c4&email_address=test1%40testingyes.com&password=test12345&securityToken=5438a9a98c3e03f0e14f6974ea5784c4
+    cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: ed658cb5d58479256a653f392018d1ab
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Content-Length: "149"
+      Content-Type: application/x-www-form-urlencoded
+      Cookie: zenid=ed658cb5d58479256a653f392018d1ab; ceid=522a41542897dee54401cca5882d293d
+      Origin: http://www.testingyes.com
+      Priority: u=0, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=login
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: POST
+    name: 03_POST_www.testingyes.com
+    url: http://www.testingyes.com/demo/index.php?main_page=login&action=process
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=login
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 04_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/index.php?main_page=shopping_cart
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=5, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=shopping_cart
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 05_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/images/icons/warning.png
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: '*/*'
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+      Priority: u=2
+      Referer: http://www.testingyes.com/demo/index.php?main_page=shopping_cart
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 06_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/general.js
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=5, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=shopping_cart
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 07_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/images/icons/small_delete.png
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=5, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=shopping_cart
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 08_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/buttons/english/button_update_cart.png

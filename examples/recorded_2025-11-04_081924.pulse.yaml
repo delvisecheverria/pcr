@@ -1,0 +1,51 @@
+concurrency: 1
+duration: 5s
+name: recorded_session
+steps:
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 01_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: '*/*'
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+      Priority: u=2
+      Referer: http://www.testingyes.com/demo/
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 02_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js
+  - cookies:
+      ceid: 522a41542897dee54401cca5882d293d
+      zenid: 8dcebcc97679e5599f516e4f32bd545b
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Cookie: zenid=8dcebcc97679e5599f516e4f32bd545b; ceid=522a41542897dee54401cca5882d293d
+      Priority: u=0, i
+      Referer: http://www.testingyes.com/demo/
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+    method: GET
+    name: 03_GET_www.testingyes.com
+    url: http://www.testingyes.com/demo/index.php?main_page=login

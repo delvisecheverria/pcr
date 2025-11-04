@@ -1,0 +1,445 @@
+/* ---------------------------------------
+   Pulse Web UI — Modern JMeter-style Layout
+   --------------------------------------- */
+
+:root {
+  --bg: #f7f8fa;
+  --text: #111;
+  --accent: #007bff;
+  --accent-hover: #0056d2;
+  --log-bg: #111;
+  --log-text: #00ff88;
+  --border: #ddd;
+  --panel-bg: #fff;
+  --shadow: rgba(0, 0, 0, 0.05);
+}
+
+body.dark {
+  --bg: #0e0e0e;
+  --text: #e0e0e0;
+  --accent: #00aaff;
+  --accent-hover: #0088cc;
+  --log-bg: #0a0a0a;
+  --log-text: #00ffcc;
+  --border: #333;
+  --panel-bg: #141414;
+  --shadow: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+/* ---------------------------------------
+   Toolbar
+   --------------------------------------- */
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------
+   Status Bar
+   --------------------------------------- */
+#status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: gray;
+}
+
+.running {
+  background: #00ff88;
+  box-shadow: 0 0 6px #00ff88;
+}
+
+.idle {
+  background: #ff5555;
+  box-shadow: 0 0 6px #ff5555;
+}
+
+/* ---------------------------------------
+   Requests Panel (split view)
+   --------------------------------------- */
+.requests-container {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: stretch;
+}
+
+/* --- Left side: request list --- */
+.requests-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  overflow-y: auto;
+  max-height: 400px;
+  box-shadow: 0 2px 4px var(--shadow);
+  padding: 0.5rem;
+}
+
+/* Each request row */
+.req-row {
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0.4rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.req-row:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.req-row.selected {
+  background: rgba(0, 123, 255, 0.1);
+  border-left: 3px solid var(--accent);
+}
+
+/* Row content */
+.req-main {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.chev {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.req-arrow {
+  color: #999;
+  font-size: 0.8rem;
+}
+.req-method {
+  font-weight: bold;
+  min-width: 60px;
+  text-align: right;
+}
+.method-GET { color: #2196f3; }
+.method-POST { color: #4caf50; }
+.method-PUT { color: #ff9800; }
+.method-DELETE { color: #f44336; }
+
+.req-path {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text);
+  word-break: break-all;
+}
+.req-status.ok { color: #00c853; }
+.req-status.err { color: #ff5252; }
+.req-status.warn { color: #c7a600; }
+.req-status.pending { color: #999; }
+
+.req-sub {
+  background: var(--panel-bg);
+  padding: 0.5rem 1rem;
+  border-left: 2px solid var(--accent);
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  transition: max-height 0.3s ease;
+}
+.hidden { display: none !important; }
+
+/* Headers table */
+.headers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.headers-table th {
+  text-align: left;
+  width: 30%;
+  padding: 0.2rem 0.4rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+.headers-table td {
+  padding: 0.2rem 0.4rem;
+  word-break: break-all;
+  color: var(--text);
+}
+.headers-empty {
+  color: #888;
+  font-style: italic;
+  padding: 0.3rem 0.6rem;
+}
+
+/* --- Right side: request detail --- */
+.request-detail {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  box-shadow: 0 2px 4px var(--shadow);
+  padding: 1rem;
+}
+
+/* Header info del request seleccionado */
+.request-header {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.3rem 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px var(--shadow);
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.request-header div strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+.tab {
+  background: none;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.tab.active {
+  border-bottom: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+/* Tab content */
+.tab-content {
+  font-family: "Fira Code", monospace;
+  font-size: 0.85rem;
+  background: var(--log-bg);
+  color: var(--log-text);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 320px;
+  white-space: pre-wrap;
+}
+
+/* Scroll refinado */
+.requests-list::-webkit-scrollbar,
+.tab-content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.requests-list::-webkit-scrollbar-thumb,
+.tab-content::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+/* ---------------------------------------
+   Log Console
+   --------------------------------------- */
+#log {
+  background: var(--log-bg);
+  color: var(--log-text);
+  font-family: "Fira Code", monospace;
+  font-size: 0.9rem;
+  padding: 1rem;
+  border-radius: 8px;
+  height: 250px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+/* ---------------------------------------
+   Recordings List
+   --------------------------------------- */
+#recordings {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  padding: 1rem;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+#recordings-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+#recordings-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+#recordings-list a {
+  color: var(--accent);
+  text-decoration: none;
+}
+#recordings-list a:hover {
+  text-decoration: underline;
+}
+.download-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+/* ---------------------------------------
+   YAML Modal
+   --------------------------------------- */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: var(--panel-bg);
+  color: var(--text);
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+#close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text);
+  cursor: pointer;
+}
+#yaml-content {
+  font-family: "Fira Code", monospace;
+  font-size: 0.85rem;
+  background: var(--log-bg);
+  color: var(--log-text);
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: pre;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+/* ---------------------------------------
+   Footer
+   --------------------------------------- */
+footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.toggle input {
+  appearance: none;
+  width: 40px;
+  height: 20px;
+  background: #ccc;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+}
+.toggle input::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  background: white;
+  transition: transform 0.3s;
+}
+.toggle input:checked {
+  background: var(--accent);
+}
+.toggle input:checked::before {
+  transform: translateX(20px);
+}

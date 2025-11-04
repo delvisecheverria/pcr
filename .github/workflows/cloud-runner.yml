@@ -1,0 +1,49 @@
+name: ☁️ Pulse Distributed Cloud Runner
+
+on:
+  workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub UI
+  push:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    name: Run Pulse Tests on Cloud
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [1, 2]  # Dos máquinas paralelas (puedes aumentar si quieres)
+
+    steps:
+      - name: 🧰 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧠 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: 📦 Install dependencies
+        run: go mod tidy
+
+      - name: ⚡ Run Orchestrator
+        run: |
+          mkdir -p uploads results
+          echo "🔹 Starting Node ${{ matrix.node }}..."
+
+          # Levanta el servidor en background
+          nohup go run ./cmd/orchestrator > orchestrator.log 2>&1 &
+
+          # Espera que arranque
+          sleep 5
+
+          # Ejecuta prueba
+          curl -X POST -F "file=@examples/recorded_2025-11-04_121255.pulse.yaml" http://localhost:5055/api/run || true
+          echo "✅ Node ${{ matrix.node }} finished test run."
+
+      - name: 📤 Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-results-node-${{ matrix.node }}
+          path: results/

@@ -1,24 +1,22 @@
 name: 🌩️ Distributed Pulse Test
 
 on:
-  workflow_dispatch: # Se ejecuta manualmente desde la pestaña Actions
+  workflow_dispatch:
 
 jobs:
   run-nodes:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [1, 2] # 🔥 Lanza dos nodos en paralelo
+        node: [1, 2]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-
       - name: Build and run node
         run: |
-          echo "🏁 Starting node ${{ matrix.node }} of 2"
+          echo "🏁 Starting node ${{ matrix.node }}"
           go run ./cmd/worker/main.go -yaml "uploads/totest.yaml" -node ${{ matrix.node }} -total 2

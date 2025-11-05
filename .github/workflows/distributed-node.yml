@@ -1,4 +1,4 @@
-name: 🌩️ Distributed Pulse Test (2 Nodes)
+name: 🌩️ Distributed Pulse Test
 
 on:
   workflow_dispatch:
@@ -8,16 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [1, 2] # 🔥 Lanza 2 nodos en paralelo
+        node: [1, 2]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-
       - name: Build and run node
         env:
           REPORT_URL: ${{ secrets.REPORT_URL }}

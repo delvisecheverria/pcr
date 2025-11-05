@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"pulse/engine" // 👈 Asegúrate de que el módulo se llama así en tu go.mod
+
+	"pulse/pkg/engine" // ✅ ruta correcta
 )
 
 // Este programa actúa como "nodo" de ejecución distribuido
@@ -24,4 +25,3 @@ func main() {
 
 	fmt.Printf("✅ Node %d finished successfully!\n", *nodeID)
 }
-

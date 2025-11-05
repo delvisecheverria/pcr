@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -32,6 +33,7 @@ type Scenario struct {
 	Scenario    string    `yaml:"scenario"`
 	Concurrency int       `yaml:"concurrency"`
 	Duration    string    `yaml:"duration"`
+	RampUp      string    `yaml:"ramp_up,omitempty"` // opcional
 	Requests    []Request `yaml:"requests"`
 }
 
@@ -41,13 +43,13 @@ type Scenario struct {
 
 type Event struct {
 	Timestamp   time.Time `json:"ts"`
-	Name        string    `json:"name"`        // etiqueta legible (siempre: "METHOD PATH")
+	Name        string    `json:"name"`        // etiqueta legible ("METHOD PATH" o "RAMP_PROGRESS")
 	Method      string    `json:"method"`
 	Path        string    `json:"path"`
 	Status      int       `json:"status"`      // HTTP status (0 si falló antes)
 	LatencyMs   float64   `json:"latency_ms"`  // en ms
 	Err         string    `json:"err,omitempty"`
-	Concurrency int       `json:"concurrency"` // concurrencia configurada
+	Concurrency int       `json:"concurrency"` // concurrencia ACTUAL al momento del evento
 }
 
 // -------------------------------------------------------------
@@ -64,7 +66,7 @@ type requestStat struct {
 // API pública
 // -------------------------------------------------------------
 
-// Run: versión clásica (no emite eventos en vivo)
+// Run: versión clásica (sin eventos en vivo)
 func Run(path string) error {
 	return runInternal(path, nil)
 }
@@ -91,6 +93,18 @@ func runInternal(path string, events chan<- Event) error {
 
 	fmt.Printf("🚀 Running scenario: %s\n", scenario.Scenario)
 	fmt.Printf("Concurrency: %d | Duration: %s\n", scenario.Concurrency, scenario.Duration)
+	var rampUp time.Duration
+	if scenario.RampUp != "" {
+		fmt.Printf("Ramp-up: %s\n", scenario.RampUp)
+		ru, err := time.ParseDuration(scenario.RampUp)
+		if err != nil {
+			return fmt.Errorf("invalid ramp_up: %v", err)
+		}
+		if ru < 0 {
+			return fmt.Errorf("invalid ramp_up: must be >= 0")
+		}
+		rampUp = ru
+	}
 
 	duration, err := time.ParseDuration(scenario.Duration)
 	if err != nil {
@@ -108,14 +122,43 @@ func runInternal(path string, events chan<- Event) error {
 		latency time.Duration
 		err     error
 	}
-
 	results := make(chan result, 10000)
 
+	// Cálculo del escalón entre workers para el ramp-up
+	var step time.Duration
+	if rampUp > 0 && scenario.Concurrency > 0 {
+		step = rampUp / time.Duration(scenario.Concurrency)
+	}
+
 	var wg sync.WaitGroup
+
+	// 🔢 Concurrencia actual (usuarios activos). Usamos atomic para seguridad en concurrencia.
+	var activeUsers int32 = 0
+
 	for i := 0; i < scenario.Concurrency; i++ {
 		wg.Add(1)
-		go func() {
+		go func(workerIdx int) {
 			defer wg.Done()
+
+			// Espera escalonada (ramp-up)
+			if step > 0 {
+				time.Sleep(step * time.Duration(workerIdx))
+			}
+
+			// Al entrar un worker, incrementamos concurrencia y emitimos evento de progreso
+			cur := atomic.AddInt32(&activeUsers, 1)
+			if events != nil {
+				events <- Event{
+					Timestamp:   time.Now(),
+					Name:        "RAMP_PROGRESS",
+					Method:      "SYSTEM",
+					Path:        fmt.Sprintf("Worker #%d started", workerIdx+1),
+					Status:      0,
+					LatencyMs:   0,
+					Concurrency: int(cur),
+				}
+			}
+
 			client := &http.Client{Timeout: 15 * time.Second}
 
 			for time.Since(start) < duration {
@@ -183,7 +226,7 @@ func runInternal(path string, events chan<- Event) error {
 					}
 				}
 			}
-		}()
+		}(i)
 	}
 
 	// Cierre del colector
@@ -194,6 +237,9 @@ func runInternal(path string, events chan<- Event) error {
 
 	// Consume resultados: actualiza stats y, si corresponde, emite eventos
 	for r := range results {
+		// concurrencia actual al momento del evento
+		curConc := int(atomic.LoadInt32(&activeUsers))
+
 		// evento en vivo
 		if events != nil {
 			ev := Event{
@@ -203,7 +249,7 @@ func runInternal(path string, events chan<- Event) error {
 				Path:        r.path,
 				Status:      r.status,
 				LatencyMs:   float64(r.latency.Microseconds()) / 1000.0,
-				Concurrency: scenario.Concurrency,
+				Concurrency: curConc,
 			}
 			if r.err != nil {
 				ev.Err = r.err.Error()
@@ -211,7 +257,7 @@ func runInternal(path string, events chan<- Event) error {
 			select {
 			case events <- ev:
 			default:
-				// si está lleno, no bloqueamos
+				// si el canal está lleno, no bloqueamos
 			}
 		}
 

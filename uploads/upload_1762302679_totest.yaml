@@ -1,0 +1,59 @@
+version: "1.0"
+scenario: "Recorded Session"
+concurrency: 6
+duration: 30s
+ramp_up: 10s
+
+requests:
+  - name: "01_POST_www.testingyes.com"
+    method: POST
+    protocol: http
+    host: www.testingyes.com
+    path: /demo/index.php?main_page=login&action=process
+    body: "securityToken=da6f948bf13fedae6591bfc31ad152d8&email_address=sdsfs%40gmail.com&password=ssdsdds&securityToken=da6f948bf13fedae6591bfc31ad152d8"
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Content-Length: "142"
+      Content-Type: application/x-www-form-urlencoded
+      Origin: http://www.testingyes.com
+      Priority: u=0, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=login
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+
+  - name: "02_GET_www.testingyes.com"
+    method: GET
+    protocol: http
+    host: www.testingyes.com
+    path: /demo/includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js
+    headers:
+      Accept: "*/*"
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+      Priority: u=2
+      Referer: http://www.testingyes.com/demo/index.php?main_page=login&action=process
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+
+  - name: "03_POST_www.testingyes.com"
+    method: POST
+    protocol: http
+    host: www.testingyes.com
+    path: /demo/index12.php?main_page=login&action=process
+    body: "securityToken=da6f948bf13fedae6591bfc31ad152d8&email_address=sdsfs%40gmail.com&password=sddsdsf&securityToken=da6f948bf13fedae6591bfc31ad152d8"
+    headers:
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+      Accept-Encoding: gzip, deflate
+      Accept-Language: en-US,en;q=0.5
+      Connection: keep-alive
+      Content-Length: "142"
+      Content-Type: application/x-www-form-urlencoded
+      Origin: http://www.testingyes.com
+      Priority: u=0, i
+      Referer: http://www.testingyes.com/demo/index.php?main_page=login&action=process
+      Upgrade-Insecure-Requests: "1"
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0

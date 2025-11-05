@@ -27,7 +27,7 @@
       margin-top: 1rem;
       font-weight: bold;
     }
-    input, button {
+    input, select, button {
       margin-top: 0.5rem;
       padding: 0.5rem;
       width: 100%;
@@ -62,7 +62,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 280px; /* Altura consistente */
+      height: 280px;
     }
 
     .chart-title {
@@ -134,7 +134,18 @@
   <form id="runForm">
     <label>YAML File:</label>
     <input type="file" id="file" accept=".yaml,.yml" required />
-    <button type="submit">🚀 Run Test</button>
+
+    <!-- 👇 NUEVO: Selector de número de nodos -->
+    <label>Number of Nodes:</label>
+    <select id="nodeCount">
+      <option value="1">1 Node</option>
+      <option value="2" selected>2 Nodes</option>
+      <option value="3">3 Nodes</option>
+      <option value="4">4 Nodes</option>
+      <option value="5">5 Nodes</option>
+    </select>
+
+    <button type="submit">🚀 Run Distributed Test</button>
   </form>
 
   <!-- DASHBOARD -->
@@ -178,116 +189,141 @@
   <div id="logs">[Logs will appear here]</div>
 
   <script>
-    const logs=document.getElementById('logs');
-    const tableBody=document.querySelector('#metricsTable tbody');
+    const logs = document.getElementById('logs');
+    const tableBody = document.querySelector('#metricsTable tbody');
 
-    // --- Crear gráficos con tooltips dinámicos ---
-    const makeChart=(id,label,color)=>new Chart(document.getElementById(id),{
-      type:'line',
-      data:{labels:[],datasets:[{
-        label,
-        data:[],
-        borderColor:color,
-        backgroundColor:color+'33',
-        fill:true,
-        tension:0.3,
-        pointRadius:1.8,
-        pointHoverRadius:6
-      }]},
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        layout:{padding:{left:8,right:8,top:5,bottom:5}},
-        interaction:{mode:'nearest',intersect:false},
-        plugins:{
-          tooltip:{
-            enabled:true,
-            backgroundColor:'rgba(0,0,0,0.8)',
-            titleFont:{weight:'bold'},
-            callbacks:{
-              label:(ctx)=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
+    const makeChart = (id, label, color) => new Chart(document.getElementById(id), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label,
+          data: [],
+          borderColor: color,
+          backgroundColor: color + '33',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 1.8,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { left: 8, right: 8, top: 5, bottom: 5 } },
+        interaction: { mode: 'nearest', intersect: false },
+        plugins: {
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleFont: { weight: 'bold' },
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
             }
           },
-          legend:{display:true,labels:{usePointStyle:true,boxWidth:10,font:{size:11}}}
+          legend: { display: true, labels: { usePointStyle: true, boxWidth: 10, font: { size: 11 } } }
         },
-        scales:{
-          x:{
-            grid:{display:false},
-            ticks:{color:'#555',font:{size:11}}
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#555', font: { size: 11 } }
           },
-          y:{
-            beginAtZero:true,
-            ticks:{color:'#555',font:{size:11}}
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#555', font: { size: 11 } }
           }
         }
       }
     });
 
-    const latencyChart=makeChart('latencyChart','Avg Response (ms)','#007bff');
-    const concurrencyChart=makeChart('concurrencyChart','Concurrency','#28a745');
-    const errorsChart=makeChart('errorsChart','Errors/sec','#dc3545');
-    const rpsChart=makeChart('rpsChart','Requests/sec','#8000ff');
+    const latencyChart = makeChart('latencyChart', 'Avg Response (ms)', '#007bff');
+    const concurrencyChart = makeChart('concurrencyChart', 'Concurrency', '#28a745');
+    const errorsChart = makeChart('errorsChart', 'Errors/sec', '#dc3545');
+    const rpsChart = makeChart('rpsChart', 'Requests/sec', '#8000ff');
 
-    const metrics={};let reqs=0,errs=0,lastTick=Date.now();
+    const metrics = {};
+    let reqs = 0, errs = 0, lastTick = Date.now();
 
-    function updateCharts(ev){
-      const now=new Date().toLocaleTimeString();
-      reqs++;if(ev.err)errs++;
-      if(Date.now()-lastTick>=1000){
-        const all=Object.values(metrics).flatMap(m=>m.lat);
-        const avg=all.reduce((a,b)=>a+b,0)/(all.length||1);
-        const add=(ch,val)=>{
+    function updateCharts(ev) {
+      const now = new Date().toLocaleTimeString();
+      reqs++; if (ev.err) errs++;
+
+      if (Date.now() - lastTick >= 1000) {
+        const all = Object.values(metrics).flatMap(m => m.lat);
+        const avg = all.reduce((a, b) => a + b, 0) / (all.length || 1);
+
+        const add = (ch, val) => {
           ch.data.labels.push(now);
           ch.data.datasets[0].data.push(val);
-          if(ch.data.labels.length>60){
+          if (ch.data.labels.length > 60) {
             ch.data.labels.shift();
             ch.data.datasets[0].data.shift();
           }
-          ch.update('none'); // sin animación para mantener fluidez
+          ch.update('none');
         };
-        add(latencyChart,avg);
-        add(concurrencyChart,ev.concurrency||1);
-        add(errorsChart,errs);
-        add(rpsChart,reqs);
-        reqs=0;errs=0;lastTick=Date.now();
+        add(latencyChart, avg);
+        add(concurrencyChart, ev.concurrency || 1);
+        add(errorsChart, errs);
+        add(rpsChart, reqs);
+        reqs = 0; errs = 0; lastTick = Date.now();
       }
     }
 
-    function updateTable(ev){
-      const key=ev.method+' '+ev.path;
-      if(!metrics[key])metrics[key]={c:0,f:0,lat:[]};
-      const m=metrics[key];m.c++;if(ev.err)m.f++;m.lat.push(ev.latency_ms);
-      const avg=m.lat.reduce((a,b)=>a+b,0)/m.lat.length;
-      const sorted=[...m.lat].sort((a,b)=>a-b);
-      const p95=sorted[Math.floor(sorted.length*0.95)]||0;
-      const errPct=(m.f/m.c*100).toFixed(2);
-      let row=tableBody.querySelector(`[data-key="${key}"]`);
-      if(!row){row=document.createElement('tr');row.dataset.key=key;tableBody.appendChild(row);}
-      row.innerHTML=`<td>${key}</td><td>${m.c}</td><td>${m.f}</td><td>${errPct}%</td><td>${avg.toFixed(1)}</td><td>${p95.toFixed(1)}</td>`;
+    function updateTable(ev) {
+      const key = ev.method + ' ' + ev.path;
+      if (!metrics[key]) metrics[key] = { c: 0, f: 0, lat: [] };
+      const m = metrics[key]; m.c++; if (ev.err) m.f++; m.lat.push(ev.latency_ms);
+      const avg = m.lat.reduce((a, b) => a + b, 0) / m.lat.length;
+      const sorted = [...m.lat].sort((a, b) => a - b);
+      const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
+      const errPct = (m.f / m.c * 100).toFixed(2);
+      let row = tableBody.querySelector(`[data-key="${key}"]`);
+      if (!row) { row = document.createElement('tr'); row.dataset.key = key; tableBody.appendChild(row); }
+      row.innerHTML = `<td>${key}</td><td>${m.c}</td><td>${m.f}</td><td>${errPct}%</td><td>${avg.toFixed(1)}</td><td>${p95.toFixed(1)}</td>`;
     }
 
-    function connectSSE(){
-      const es=new EventSource('/api/events');
-      es.onmessage=e=>{
-        const ev=JSON.parse(e.data);
-        logs.textContent+=`\n${ev.method} ${ev.path} → ${ev.status||'-'} (${ev.latency_ms.toFixed(1)}ms)`;
-        logs.scrollTop=logs.scrollHeight;
+    function connectSSE() {
+      const es = new EventSource('/api/events');
+      es.onmessage = e => {
+        const ev = JSON.parse(e.data);
+
+        if (ev.name === "RAMP_PROGRESS") {
+          const now = new Date().toLocaleTimeString();
+          concurrencyChart.data.labels.push(now);
+          concurrencyChart.data.datasets[0].data.push(ev.concurrency);
+          if (concurrencyChart.data.labels.length > 60) {
+            concurrencyChart.data.labels.shift();
+            concurrencyChart.data.datasets[0].data.shift();
+          }
+          concurrencyChart.update('none');
+          logs.textContent += `\n⚙️ ${ev.path} (${ev.concurrency} active users)`;
+          logs.scrollTop = logs.scrollHeight;
+          return;
+        }
+
+        logs.textContent += `\n${ev.method} ${ev.path} → ${ev.status || '-'} (${ev.latency_ms.toFixed(1)}ms)`;
+        logs.scrollTop = logs.scrollHeight;
         updateTable(ev);
         updateCharts(ev);
       };
-      es.onerror=()=>{logs.textContent+="\n⚠️ Connection lost. Reconnecting...";setTimeout(connectSSE,3000);};
+      es.onerror = () => {
+        logs.textContent += "\n⚠️ Connection lost. Reconnecting...";
+        setTimeout(connectSSE, 3000);
+      };
     }
 
-    document.getElementById('runForm').addEventListener('submit',async e=>{
+    document.getElementById('runForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const file=document.getElementById('file').files[0];
-      if(!file)return alert('Please select a YAML file first!');
-      logs.textContent="⏳ Uploading YAML and starting test...\n";
-      const formData=new FormData();
-      formData.append('file',file);
-      const res=await fetch('/api/run',{method:'POST',body:formData});
-      const data=await res.json();
-      logs.textContent+="\n"+data.message;
+      const file = document.getElementById('file').files[0];
+      const nodes = document.getElementById('nodeCount').value;
+      if (!file) return alert('Please select a YAML file first!');
+      logs.textContent = `⏳ Uploading YAML and launching ${nodes} node(s)...\n`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('nodes', nodes);
+      const res = await fetch('/api/run-distributed', { method: 'POST', body: formData });
+      const data = await res.json();
+      logs.textContent += "\n" + data.message;
     });
 
     connectSSE();

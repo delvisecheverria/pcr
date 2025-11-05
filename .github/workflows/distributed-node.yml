@@ -17,6 +17,8 @@ jobs:
         with:
           go-version: '1.22'
       - name: Build and run node
+        env:
+          REPORT_URL: ${{ secrets.REPORT_URL }}
         run: |
-          echo "🏁 Starting node ${{ matrix.node }}"
+          echo "🏁 Starting node ${{ matrix.node }} of 2"
           go run ./cmd/worker/main.go -yaml "uploads/totest.yaml" -node ${{ matrix.node }} -total 2

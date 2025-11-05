@@ -141,8 +141,6 @@ func main() {
 	})
 
 	// --- POST /api/report ---
-	// Nodos remotos (GitHub Actions, etc.) envían aquí eventos JSON (engine.Event)
-	// para alimentar la UI en tiempo real y visualizar métricas distribuidas.
 	mux.HandleFunc("/api/report", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -156,11 +154,9 @@ func main() {
 			return
 		}
 
-		// Log descriptivo
 		fmt.Printf("📩 Report received from node: %s | path: %s | status: %d | latency: %.2fms | error: %s\n",
 			ev.Name, ev.Path, ev.Status, ev.LatencyMs, ev.Err)
 
-		// Serializa y retransmite a la UI vía SSE
 		data, _ := json.Marshal(ev)
 		broker.broadcast(data)
 
@@ -180,7 +176,6 @@ func main() {
 			nodes = "2"
 		}
 
-		// 1️⃣ Guardar YAML subido
 		file, _, err := r.FormFile("file")
 		if err != nil {
 			http.Error(w, "missing file", http.StatusBadRequest)
@@ -193,7 +188,6 @@ func main() {
 		defer out.Close()
 		io.Copy(out, file)
 
-		// 2️⃣ Template dinámico del workflow (escapando ${{ matrix.node }})
 		const tpl = `name: 🌩️ Distributed Pulse Test
 
 on:
@@ -220,7 +214,6 @@ jobs:
           go run ./cmd/worker/main.go -yaml "uploads/totest.yaml" -node ${{"{{"}} matrix.node {{"}}"}} -total {{len .}}
 `
 
-		// 3️⃣ Crear workflow file dinámico
 		filePath := ".github/workflows/distributed-node.yml"
 		os.MkdirAll(".github/workflows", 0755)
 		f, _ := os.Create(filePath)
@@ -239,10 +232,11 @@ jobs:
 		t := template.Must(template.New("workflow").Parse(tpl))
 		_ = t.Execute(f, nodeList)
 
-		// 4️⃣ Git commit & push
+		// ✅ Forzar commit con timestamp
+		timestamp := time.Now().Format("20060102_150405")
 		cmds := [][]string{
 			{"git", "add", filePath, outPath},
-			{"git", "commit", "-m", fmt.Sprintf("🚀 Run distributed test with %d nodes", n)},
+			{"git", "commit", "--allow-empty", "-m", fmt.Sprintf("🚀 Run distributed test (%s) with %d nodes", timestamp, n)},
 			{"git", "push"},
 		}
 		for _, args := range cmds {
@@ -257,7 +251,7 @@ jobs:
 		}
 
 		json.NewEncoder(w).Encode(map[string]string{
-			"message": fmt.Sprintf("✅ Workflow committed for %d nodes! Trigger it in Actions.", n),
+			"message": fmt.Sprintf("✅ Workflow committed for %d nodes! Triggered automatically in GitHub Actions.", n),
 		})
 	})
 

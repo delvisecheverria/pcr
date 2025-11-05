@@ -1,0 +1,41 @@
+name: Pulse Distributed Node
+on:
+  workflow_dispatch:
+    inputs:
+      yaml_url:
+        description: "URL del YAML to execute"
+        required: true
+      node_id:
+        description: "Node ID (1, 2, ...)"
+        required: true
+      total_nodes:
+        description: "Total Nodes"
+        required: true
+
+jobs:
+  run-node:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: 📦 Download YAML file
+        run: |
+          mkdir -p uploads
+          echo "Downloading YAML from ${{ github.event.inputs.yaml_url }}"
+          curl -L ${{ github.event.inputs.yaml_url }} -o uploads/test.yaml
+          ls -lh uploads
+
+      - name: 🚀 Execute Pulse Node ${{ github.event.inputs.node_id }}
+        run: |
+          echo "🏁 Starting node ${{ github.event.inputs.node_id }} of ${{ github.event.inputs.total_nodes }}"
+          go run ./cmd/worker/main.go \
+            --node ${{ github.event.inputs.node_id }} \
+            --total ${{ github.event.inputs.total_nodes }} \
+            --yaml uploads/test.yaml
+

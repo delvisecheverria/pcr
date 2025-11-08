@@ -86,6 +86,9 @@ func (r *Recorder) Start() error {
 		log.Println("[RECORDER] 🧩 Stop signal received — writing YAML output...")
 	}
 
+	// Asegura que todo el tráfico pendiente se termine antes de guardar
+	time.Sleep(2 * time.Second)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	_ = r.server.Shutdown(ctx)
@@ -117,7 +120,6 @@ func (r *Recorder) handleHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Clonar body
 	var bodyBuf []byte
 	if req.Body != nil {
 		b, _ := io.ReadAll(req.Body)
@@ -125,7 +127,6 @@ func (r *Recorder) handleHTTP(w http.ResponseWriter, req *http.Request) {
 		req.Body = io.NopCloser(bytes.NewReader(b))
 	}
 
-	// Headers y cookies
 	headers := make(map[string]string)
 	for k, v := range req.Header {
 		headers[k] = strings.Join(v, "; ")
@@ -152,7 +153,6 @@ func (r *Recorder) handleHTTP(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("[RECORDER] ➡️ %s %s", req.Method, req.URL.String())
 
-	// Proxy al upstream
 	resp, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil {
 		http.Error(w, "Upstream error: "+err.Error(), http.StatusBadGateway)
@@ -171,7 +171,6 @@ func (r *Recorder) handleHTTP(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, bytes.NewReader(respBody))
 
-	// 🔥 Emitir solo un evento final (sin duplicar)
 	r.emitEvent(RecordedEvent{
 		Method:   req.Method,
 		URL:      req.URL.String(),
@@ -256,7 +255,11 @@ func (r *Recorder) writeYAML() error {
 	copy(records, r.records)
 	r.mu.Unlock()
 
-	// 🔹 Encabezado estándar
+	if len(records) == 0 {
+		log.Println("[RECORDER] ⚠️ No requests recorded — skipping YAML generation.")
+		return nil
+	}
+
 	out := map[string]interface{}{
 		"version":     "1.0",
 		"scenario":    "Recorded Session",
@@ -267,7 +270,6 @@ func (r *Recorder) writeYAML() error {
 	var requests []map[string]interface{}
 
 	for i, rec := range records {
-		// Extrae protocolo y path
 		protocol := "https"
 		path := rec.URL
 		if strings.HasPrefix(rec.URL, "http://") {
@@ -277,7 +279,6 @@ func (r *Recorder) writeYAML() error {
 			path = strings.TrimPrefix(rec.URL, "https://"+rec.Host)
 		}
 
-		// Limpia headers (sin cookies)
 		cleanHeaders := map[string]string{}
 		for k, v := range rec.Headers {
 			if strings.ToLower(k) != "cookie" {
@@ -292,16 +293,9 @@ func (r *Recorder) writeYAML() error {
 			"host":     rec.Host,
 			"path":     path,
 			"headers":  cleanHeaders,
+			"body":     rec.Body, // ✅ corregido: ya no usa yaml.Node
 		}
 
-		// Siempre escribir body (aunque esté vacío)
-		req["body"] = yaml.Node{
-			Kind:  yaml.ScalarNode,
-			Style: yaml.LiteralStyle, // fuerza body: |
-			Value: rec.Body,
-		}
-
-		// Nota opcional
 		if rec.Note != "" {
 			req["note"] = rec.Note
 		}

@@ -12,227 +12,130 @@
       margin: 2rem;
       color: #222;
     }
-    h1 {
-      color: #007bff;
-    }
-    form {
-      background: #fff;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 500px;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    input, select, button {
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      width: 100%;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
+    h1 { color: #007bff; }
+    h2 { margin-bottom: 0.5rem; color: #333; }
 
-    /* --- CHARTS LAYOUT --- */
-    .charts {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.2rem;
-      margin-top: 2rem;
-    }
+    .main-layout { display: flex; flex-direction: column; gap: 2rem; }
 
-    .chart-box {
-      background: #fff;
-      border-radius: 10px;
-      padding: 1rem 1.2rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 280px;
+    .controls {
+      display: flex; align-items: center; gap: 1rem;
+      background: #fff; padding: 1rem 1.5rem;
+      border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-
-    .chart-title {
-      text-align: left;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 0.5rem;
+    .controls label { font-weight: bold; margin-right: 0.5rem; }
+    .controls input, .controls select {
+      padding: 0.5rem; border: 1px solid #ccc; border-radius: 5px;
     }
-
-    .chart-box canvas {
-      flex: 1;
-      width: 100% !important;
-      height: 100% !important;
+    .controls button {
+      background: #007bff; color: white; font-weight: bold;
+      padding: 0.5rem 1.2rem; border: none; border-radius: 6px;
+      cursor: pointer; transition: background 0.2s;
     }
+    .controls button:hover { background: #0056b3; }
 
-    /* --- TABLE --- */
-    .table-container {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      overflow: hidden;
-      margin-top: 2rem;
-      max-height: 300px;
-      overflow-y: auto;
+    .table-block {
+      background: #fff; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 1rem;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     th {
-      background: #007bff;
-      color: white;
-      font-size: 0.9rem;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+      background: #007bff; color: white; position: sticky; top: 0; z-index: 1;
     }
 
-    /* --- LOGS --- */
-    #logs {
-      background: #111;
-      color: #0f0;
-      padding: 1rem;
-      height: 250px;
-      overflow-y: auto;
-      margin-top: 2rem;
-      border-radius: 8px;
-      font-family: monospace;
+    .overview-block {
+      background: #fff; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 1rem 1.5rem;
+    }
+    #overviewChart { width: 100%; height: 350px !important; }
+
+    .charts-block {
+      background: #fff; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 1rem 1.5rem;
+    }
+    .charts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+    .chart-box {
+      background: #fdfdfd; border-radius: 10px;
+      padding: 2rem 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      display: flex; flex-direction: column; justify-content: space-between; height: 280px;
+    }
+    .chart-title { font-weight: 600; color: #333; margin-bottom: 0.5rem; }
+    .chart-box canvas { flex: 1; width: 100% !important; height: 100% !important; }
+
+    .logs-block {
+      background: #111; color: #0f0; padding: 1rem; height: 300px;
+      overflow-y: auto; border-radius: 8px; font-family: monospace;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    @media (max-width: 900px) {
-      .charts {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 1100px) {
+      .controls { flex-direction: column; align-items: stretch; }
+      .charts { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <h1>⚡ Pulse Cloud Runner</h1>
-
-  <form id="runForm">
-    <label>YAML File:</label>
-    <input type="file" id="file" accept=".yaml,.yml" required />
-
-    <!-- 👇 NUEVO: Selector de número de nodos -->
-    <label>Number of Nodes:</label>
-    <select id="nodeCount">
-      <option value="1">1 Node</option>
-      <option value="2" selected>2 Nodes</option>
-      <option value="3">3 Nodes</option>
-      <option value="4">4 Nodes</option>
-      <option value="5">5 Nodes</option>
-    </select>
-
-    <button type="submit">🚀 Run Distributed Test</button>
-  </form>
-
-  <!-- DASHBOARD -->
-  <div class="charts">
-    <div class="chart-box">
-      <div class="chart-title">Average Response Time (ms)</div>
-      <canvas id="latencyChart"></canvas>
+  <div class="main-layout">
+    <div class="controls">
+      <label>YAML File:</label>
+      <input type="file" id="file" accept=".yaml,.yml" required />
+      <label>Nodes:</label>
+      <select id="nodeCount">
+        <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+      </select>
+      <button id="runBtn">🚀 Run Distributed Test</button>
     </div>
-    <div class="chart-box">
-      <div class="chart-title">Concurrency Over Time</div>
-      <canvas id="concurrencyChart"></canvas>
+
+    <div class="table-block">
+      <table id="metricsTable">
+        <thead><tr><th>Request</th><th>Count</th><th>Fails</th><th>Error %</th><th>Avg (ms)</th><th>P95 (ms)</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <div class="chart-box">
-      <div class="chart-title">Errors Per Second</div>
-      <canvas id="errorsChart"></canvas>
+
+    <div class="overview-block">
+      <h2>📈 Global Overview</h2>
+      <canvas id="overviewChart"></canvas>
     </div>
-    <div class="chart-box">
-      <div class="chart-title">Requests Per Second (RPS)</div>
-      <canvas id="rpsChart"></canvas>
+
+    <div class="charts-block">
+      <h2>Detailed Metrics</h2>
+      <div class="charts">
+        <div class="chart-box"><div class="chart-title">Average Response Time (ms)</div><canvas id="latencyChart"></canvas></div>
+        <div class="chart-box"><div class="chart-title">Concurrency Over Time</div><canvas id="concurrencyChart"></canvas></div>
+        <div class="chart-box"><div class="chart-title">Errors Per Second</div><canvas id="errorsChart"></canvas></div>
+        <div class="chart-box"><div class="chart-title">Requests Per Second (RPS)</div><canvas id="rpsChart"></canvas></div>
+      </div>
     </div>
+
+    <div class="logs-block" id="logs">[Logs will appear here]</div>
   </div>
-
-  <h3>📊 Request Metrics Summary</h3>
-  <div class="table-container">
-    <table id="metricsTable">
-      <thead>
-        <tr>
-          <th>Request</th>
-          <th>Count</th>
-          <th>Fails</th>
-          <th>Error %</th>
-          <th>Avg (ms)</th>
-          <th>P95 (ms)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <h3>🪵 Live Logs</h3>
-  <div id="logs">[Logs will appear here]</div>
 
   <script>
     const logs = document.getElementById('logs');
     const tableBody = document.querySelector('#metricsTable tbody');
+    const runBtn = document.getElementById('runBtn');
 
+    // === Individual Charts ===
     const makeChart = (id, label, color) => new Chart(document.getElementById(id), {
       type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label,
-          data: [],
-          borderColor: color,
-          backgroundColor: color + '33',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 1.8,
-          pointHoverRadius: 6
-        }]
-      },
+      data: { labels: [], datasets: [{
+        label, data: [],
+        borderColor: color,
+        backgroundColor: color + '33',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 1.8,
+        pointHoverRadius: 5
+      }]},
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        layout: { padding: { left: 8, right: 8, top: 5, bottom: 5 } },
+        responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'nearest', intersect: false },
         plugins: {
-          tooltip: {
-            enabled: true,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            titleFont: { weight: 'bold' },
-            callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
-            }
-          },
-          legend: { display: true, labels: { usePointStyle: true, boxWidth: 10, font: { size: 11 } } }
+          legend: { display: true, labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, font: { size: 11 } } }
         },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#555', font: { size: 11 } }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: { color: '#555', font: { size: 11 } }
-          }
-        }
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
       }
     });
 
@@ -241,30 +144,106 @@
     const errorsChart = makeChart('errorsChart', 'Errors/sec', '#dc3545');
     const rpsChart = makeChart('rpsChart', 'Requests/sec', '#8000ff');
 
+    // === Global Overview ===
+    const overviewChart = new Chart(document.getElementById('overviewChart'), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Response Time (ms)', borderColor: '#007bff', backgroundColor: '#007bff22', data: [], fill: true, tension: 0.35 },
+          { label: 'Concurrency', borderColor: '#28a745', backgroundColor: '#28a74522', data: [], fill: true, tension: 0.35 },
+          { label: 'Errors/sec', borderColor: '#dc3545', backgroundColor: '#dc354522', data: [], fill: true, tension: 0.35 },
+          { label: 'Requests/sec', borderColor: '#8000ff', backgroundColor: '#8000ff22', data: [], fill: true, tension: 0.35 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 800, easing: 'easeInOutQuart' },
+        layout: { padding: { top: 25 } },
+        scales: {
+          x: {
+            type: 'category',
+            ticks: { color: '#555', font: { size: 10 } },
+            grid: { color: '#eee' }
+          },
+          y: { display: false }
+        },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, padding: 15 }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const ds = ctx.dataset;
+                const i = ctx.dataIndex;
+                const real = ds._realValues?.[i] ?? 0;
+                const label = ds.label;
+                const val = real.toFixed(2);
+                if (label.includes('Response')) return ` ${label}: ${val} ms`;
+                if (label.includes('Concurrency')) return ` ${label}: ${val} users`;
+                if (label.includes('Errors')) return ` ${label}: ${val} errors`;
+                if (label.includes('Requests')) return ` ${label}: ${val} req/s`;
+                return ` ${label}: ${val}`;
+              }
+            }
+          }
+        }
+      }
+    });
+
     const metrics = {};
     let reqs = 0, errs = 0, lastTick = Date.now();
 
+    function normalize(arr) {
+      const min = Math.min(...arr);
+      const max = Math.max(...arr);
+      if (max - min === 0) return arr.map(() => 0.5);
+      return arr.map(v => (v - min) / (max - min));
+    }
+
     function updateCharts(ev) {
-      const now = new Date().toLocaleTimeString();
       reqs++; if (ev.err) errs++;
 
       if (Date.now() - lastTick >= 1000) {
+        const now = new Date().toLocaleTimeString();
         const all = Object.values(metrics).flatMap(m => m.lat);
-        const avg = all.reduce((a, b) => a + b, 0) / (all.length || 1);
+        const avg = all.reduce((a,b)=>a+b,0)/(all.length||1);
+        const conc = ev.concurrency || 1;
 
         const add = (ch, val) => {
           ch.data.labels.push(now);
           ch.data.datasets[0].data.push(val);
-          if (ch.data.labels.length > 60) {
-            ch.data.labels.shift();
-            ch.data.datasets[0].data.shift();
-          }
+          if (ch.data.labels.length > 60) { ch.data.labels.shift(); ch.data.datasets[0].data.shift(); }
           ch.update('none');
         };
+
         add(latencyChart, avg);
-        add(concurrencyChart, ev.concurrency || 1);
+        add(concurrencyChart, conc);
         add(errorsChart, errs);
         add(rpsChart, reqs);
+
+        const overview = overviewChart.data;
+        overview.labels.push(now);
+        const datasets = overview.datasets;
+        const reals = [[avg],[conc],[errs],[reqs]];
+
+        datasets.forEach((d, idx) => {
+          d._realValues = d._realValues || [];
+          d._realValues.push(reals[idx][0]);
+          if (d._realValues.length > 60) d._realValues.shift();
+        });
+
+        const allSeries = datasets.map(d => normalize(d._realValues));
+        allSeries.forEach((norm, i) => datasets[i].data = norm);
+
+        if (overview.labels.length > 60) overview.labels.shift();
+        overviewChart.update();
+
         reqs = 0; errs = 0; lastTick = Date.now();
       }
     }
@@ -273,10 +252,10 @@
       const key = ev.method + ' ' + ev.path;
       if (!metrics[key]) metrics[key] = { c: 0, f: 0, lat: [] };
       const m = metrics[key]; m.c++; if (ev.err) m.f++; m.lat.push(ev.latency_ms);
-      const avg = m.lat.reduce((a, b) => a + b, 0) / m.lat.length;
-      const sorted = [...m.lat].sort((a, b) => a - b);
-      const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
-      const errPct = (m.f / m.c * 100).toFixed(2);
+      const avg = m.lat.reduce((a,b)=>a+b,0)/m.lat.length;
+      const sorted = [...m.lat].sort((a,b)=>a-b);
+      const p95 = sorted[Math.floor(sorted.length*0.95)] || 0;
+      const errPct = (m.f/m.c*100).toFixed(2);
       let row = tableBody.querySelector(`[data-key="${key}"]`);
       if (!row) { row = document.createElement('tr'); row.dataset.key = key; tableBody.appendChild(row); }
       row.innerHTML = `<td>${key}</td><td>${m.c}</td><td>${m.f}</td><td>${errPct}%</td><td>${avg.toFixed(1)}</td><td>${p95.toFixed(1)}</td>`;
@@ -286,34 +265,18 @@
       const es = new EventSource('/api/events');
       es.onmessage = e => {
         const ev = JSON.parse(e.data);
-
-        if (ev.name === "RAMP_PROGRESS") {
-          const now = new Date().toLocaleTimeString();
-          concurrencyChart.data.labels.push(now);
-          concurrencyChart.data.datasets[0].data.push(ev.concurrency);
-          if (concurrencyChart.data.labels.length > 60) {
-            concurrencyChart.data.labels.shift();
-            concurrencyChart.data.datasets[0].data.shift();
-          }
-          concurrencyChart.update('none');
-          logs.textContent += `\n⚙️ ${ev.path} (${ev.concurrency} active users)`;
-          logs.scrollTop = logs.scrollHeight;
-          return;
-        }
-
+        if (ev.name === "RAMP_PROGRESS") return;
         logs.textContent += `\n${ev.method} ${ev.path} → ${ev.status || '-'} (${ev.latency_ms.toFixed(1)}ms)`;
         logs.scrollTop = logs.scrollHeight;
         updateTable(ev);
         updateCharts(ev);
       };
-      es.onerror = () => {
-        logs.textContent += "\n⚠️ Connection lost. Reconnecting...";
-        setTimeout(connectSSE, 3000);
-      };
+      es.onerror = () => setTimeout(connectSSE, 3000);
     }
 
-    document.getElementById('runForm').addEventListener('submit', async e => {
-      e.preventDefault();
+    connectSSE();
+
+    runBtn.addEventListener('click', async () => {
       const file = document.getElementById('file').files[0];
       const nodes = document.getElementById('nodeCount').value;
       if (!file) return alert('Please select a YAML file first!');
@@ -325,8 +288,6 @@
       const data = await res.json();
       logs.textContent += "\n" + data.message;
     });
-
-    connectSSE();
   </script>
 </body>
 </html>

@@ -18,8 +18,9 @@ import (
 )
 
 var (
-	activeRecorder *recorder.Recorder
-	recorderLock   sync.Mutex
+	globalRec      *recorder.Recorder
+	isRunning      bool
+	mu             sync.Mutex
 	logSubscribers = make(map[chan string]bool)
 	logMu          sync.Mutex
 )
@@ -46,7 +47,7 @@ func findAvailablePort(startPort int) string {
 			return addr
 		}
 	}
-	return fmt.Sprintf(":%d", startPort) // fallback
+	return fmt.Sprintf(":%d", startPort)
 }
 
 func main() {
@@ -97,7 +98,7 @@ func main() {
 	recordCmd.Flags().StringVarP(&recordOut, "out", "o", "examples", "Output directory for recorded YAML files")
 
 	// ---------------------------------------------------------------------
-	// SERVE COMMAND — Full Web UI + API
+	// SERVE COMMAND — Web UI + API
 	// ---------------------------------------------------------------------
 	var serveCmd = &cobra.Command{
 		Use:   "serve",
@@ -107,15 +108,11 @@ func main() {
 			fmt.Printf("⚡ Starting Pulse backend & UI at http://localhost%s\n", port)
 
 			mux := http.NewServeMux()
-			var rec *recorder.Recorder
-			var isRunning bool
-			var mu sync.Mutex
 
 			// --- API: Start Recorder ---
 			mux.HandleFunc("/api/start-record", func(w http.ResponseWriter, r *http.Request) {
 				mu.Lock()
 				defer mu.Unlock()
-
 				w.Header().Set("Content-Type", "application/json")
 
 				if isRunning {
@@ -127,37 +124,29 @@ func main() {
 					return
 				}
 
-				rec = recorder.New(":8888", "examples")
+				globalRec = recorder.New(":8888", "examples")
 				isRunning = true
 				broadcastLog("✅ Recorder started on :8888")
 
-				// 🔥 Escucha los eventos emitidos por el recorder
-				go func() {
+				// Escucha los eventos del recorder
+				go func(rec *recorder.Recorder) {
 					for ev := range rec.Events {
-						eventData := map[string]interface{}{
-							"method":   ev.Method,
-							"url":      ev.URL,
-							"status":   ev.Status,
-							"time":     ev.Time,
-							"headers":  ev.Headers,
-							"body":     ev.Body,
-							"response": ev.Response,
-						}
-						data, _ := json.Marshal(eventData)
+						data, _ := json.Marshal(ev)
 						broadcastLog(string(data))
 					}
-				}()
+				}(globalRec)
 
-				// Inicia el recorder en background
-				go func() {
+				// Ejecuta Start bloqueante, para que espere correctamente Stop()
+				go func(rec *recorder.Recorder) {
 					if err := rec.Start(); err != nil {
 						broadcastLog(fmt.Sprintf("❌ Recorder error: %v", err))
 					}
+					time.Sleep(500 * time.Millisecond) // asegura flush final
 					mu.Lock()
 					isRunning = false
 					mu.Unlock()
 					broadcastLog("🟢 Recorder stopped (finished or interrupted)")
-				}()
+				}(globalRec)
 
 				json.NewEncoder(w).Encode(map[string]string{
 					"message": "✅ Recorder started on :8888 — configure your proxy to localhost:8888",
@@ -168,10 +157,9 @@ func main() {
 			mux.HandleFunc("/api/stop-record", func(w http.ResponseWriter, r *http.Request) {
 				mu.Lock()
 				defer mu.Unlock()
-
 				w.Header().Set("Content-Type", "application/json")
 
-				if !isRunning || rec == nil {
+				if !isRunning || globalRec == nil {
 					w.WriteHeader(http.StatusBadRequest)
 					json.NewEncoder(w).Encode(map[string]string{
 						"error":   "not_running",
@@ -180,13 +168,22 @@ func main() {
 					return
 				}
 
-				rec.Stop()
-				isRunning = false
+				broadcastLog("📁 Stopping recorder... waiting for final requests...")
+				time.Sleep(2 * time.Second) // margen para requests pendientes
+				globalRec.Stop()
+
 				broadcastLog("📁 Recorder stopped and YAML written to ./examples")
+				isRunning = false
 
 				json.NewEncoder(w).Encode(map[string]string{
 					"message": "🛑 Recorder stopped and YAML written to ./examples",
 				})
+			})
+
+			// --- API: Stop Recorder (alias) ---
+			mux.HandleFunc("/api/stop", func(w http.ResponseWriter, r *http.Request) {
+				r.URL.Path = "/api/stop-record"
+				mux.ServeHTTP(w, r)
 			})
 
 			// --- API: Status ---
@@ -232,7 +229,6 @@ func main() {
 				logMu.Lock()
 				logSubscribers[ch] = true
 				logMu.Unlock()
-
 				broadcastLog("👋 New client connected to /api/logs")
 
 				defer func() {
@@ -274,11 +270,9 @@ func main() {
 				uiDir = fmt.Sprintf("%s/ui", execDir)
 			}
 			fmt.Printf("📂 Serving UI from: %s\n", uiDir)
+			mux.Handle("/", http.FileServer(http.Dir(uiDir)))
 
-			fs := http.FileServer(http.Dir(uiDir))
-			mux.Handle("/", fs)
-
-			// --- Add CORS middleware ---
+			// --- CORS Middleware ---
 			corsMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -292,7 +286,6 @@ func main() {
 
 			// --- Start Server ---
 			srv := &http.Server{Addr: port, Handler: corsMux}
-
 			stop := make(chan os.Signal, 1)
 			signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 			go func() {
@@ -311,7 +304,6 @@ func main() {
 	}
 
 	rootCmd.AddCommand(runCmd, recordCmd, serveCmd)
-
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)

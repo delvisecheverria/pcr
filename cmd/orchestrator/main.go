@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -60,6 +59,7 @@ func main() {
 	fmt.Printf("⚡ Orchestrator running on http://localhost%s\n", port)
 
 	mux := http.NewServeMux()
+
 	os.MkdirAll("uploads", 0755)
 	os.MkdirAll("results", 0755)
 
@@ -95,6 +95,56 @@ func main() {
 		}
 	})
 
+	// --- POST /api/run ---
+	mux.HandleFunc("/api/run", func(w http.ResponseWriter, r *http.Request) {
+		file, header, err := r.FormFile("file")
+		if err != nil {
+			http.Error(w, "missing file", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		filename := fmt.Sprintf("upload_%d_%s", time.Now().Unix(), header.Filename)
+		savePath := filepath.Join("uploads", filename)
+		out, _ := os.Create(savePath)
+		defer out.Close()
+		io.Copy(out, file)
+
+		start := time.Now()
+		events := make(chan engine.Event, 100)
+
+		go func() {
+			for ev := range events {
+				// 🚫 Ignorar eventos del sistema que no son requests HTTP
+				if ev.Method == "" || ev.Method == "SYSTEM" || ev.Method == "INFO" {
+					continue
+				}
+
+				data, _ := json.Marshal(ev)
+				broker.broadcast(data)
+			}
+		}()
+
+		go func() {
+			engine.RunWithEvents(savePath, events)
+			close(events)
+
+			end := time.Now()
+			summary := map[string]interface{}{
+				"started_at": start,
+				"ended_at":   end,
+				"yaml_file":  filename,
+			}
+			outPath := fmt.Sprintf("results/run_%s.summary.json", end.Format("2006-01-02_150405"))
+			os.WriteFile(outPath, mustJSON(summary), 0644)
+		}()
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "Test started (streaming metrics via /api/events)",
+		})
+	})
+
 	// --- POST /api/report ---
 	mux.HandleFunc("/api/report", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -106,6 +156,11 @@ func main() {
 		if err := json.NewDecoder(r.Body).Decode(&ev); err != nil {
 			http.Error(w, "invalid event body", http.StatusBadRequest)
 			fmt.Println("❌ Invalid report received:", err)
+			return
+		}
+
+		// 🚫 Ignorar también eventos de sistema enviados remotamente
+		if ev.Method == "" || ev.Method == "SYSTEM" || ev.Method == "INFO" {
 			return
 		}
 
@@ -147,11 +202,6 @@ func main() {
 
 on:
   workflow_dispatch:
-    inputs:
-      nodes:
-        description: "Number of nodes to launch"
-        required: true
-        default: "2"
 
 jobs:
   run-nodes:
@@ -192,7 +242,6 @@ jobs:
 		t := template.Must(template.New("workflow").Parse(tpl))
 		_ = t.Execute(f, nodeList)
 
-		// 3️⃣ Commit + Push
 		timestamp := time.Now().Format("20060102_150405")
 		cmds := [][]string{
 			{"git", "add", filePath, outPath},
@@ -201,35 +250,35 @@ jobs:
 		}
 		for _, args := range cmds {
 			cmd := exec.Command(args[0], args[1:]...)
-			out, err := cmd.CombinedOutput()
+			output, err := cmd.CombinedOutput()
 			if err != nil {
 				json.NewEncoder(w).Encode(map[string]string{
-					"error": fmt.Sprintf("git error: %v (%s)", err, string(out)),
+					"error": fmt.Sprintf("git error: %v (%s)", err, string(output)),
 				})
 				return
 			}
 		}
 
-		// 4️⃣ Disparar el workflow por API
-		token := os.Getenv("PERSONAL_GITHUB_TOKEN")
-		if token == "" {
-			fmt.Println("⚠️ No PERSONAL_GITHUB_TOKEN set — skipping dispatch trigger")
+		// 🚀 Disparar automáticamente el workflow en GitHub Actions (mostrar respuesta HTTP completa)
+		trigger := exec.Command("curl",
+			"-i", // incluye encabezados HTTP
+			"-X", "POST",
+			"-H", "Accept: application/vnd.github+json",
+			"-H", fmt.Sprintf("Authorization: Bearer %s", os.Getenv("PERSONAL_GITHUB_TOKEN")),
+			"https://api.github.com/repos/delvisecheverria/pcr/actions/workflows/distributed-node.yml/dispatches",
+			"-d", `{"ref":"main"}`)
+
+		triggerOutput, err := trigger.CombinedOutput()
+		fmt.Println("🔍 GitHub API response:")
+		fmt.Println(string(triggerOutput))
+		if err != nil {
+			fmt.Println("⚠️ Failed to trigger workflow:", err)
 		} else {
-			dispatchURL := "https://api.github.com/repos/delvisecheverria/pcr/actions/workflows/distributed-node.yml/dispatches"
-			payload := strings.NewReader(fmt.Sprintf(`{"ref":"main","inputs":{"nodes":"%d"}}`, n))
-			req, _ := http.NewRequest("POST", dispatchURL, payload)
-			req.Header.Set("Authorization", "Bearer "+token)
-			req.Header.Set("Accept", "application/vnd.github+json")
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				fmt.Println("❌ Error triggering workflow:", err)
-			} else {
-				fmt.Println("🚀 Workflow dispatch status:", resp.Status)
-			}
+			fmt.Println("🚀 Workflow trigger request sent successfully!")
 		}
 
 		json.NewEncoder(w).Encode(map[string]string{
-			"message": fmt.Sprintf("✅ Workflow committed and dispatched for %d nodes!", n),
+			"message": fmt.Sprintf("✅ Workflow committed & attempted to launch with %d nodes!", n),
 		})
 	})
 

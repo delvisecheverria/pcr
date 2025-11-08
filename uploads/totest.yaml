@@ -1,5 +1,8 @@
-concurrency: 1
-duration: 10s
+version: "1.0"
+scenario: "Recorded Session"
+concurrency: 20
+duration: 120s
+ramp_up: 30s
 requests:
   - body: ""
     headers:

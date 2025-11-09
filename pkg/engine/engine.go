@@ -15,7 +15,7 @@ import (
 )
 
 // -------------------------------------------------------------
-// Estructuras base del escenario
+// Estructuras base del escenario (nuevo formato con scenarios)
 // -------------------------------------------------------------
 
 type Request struct {
@@ -28,28 +28,38 @@ type Request struct {
 	Body     string            `yaml:"body,omitempty"`
 }
 
+type Profile struct {
+	Concurrency   int    `yaml:"concurrency"`
+	RampUp        string `yaml:"ramp_up"`
+	Duration      string `yaml:"duration"`
+	RampDown      string `yaml:"ramp_down"`
+	Iterations    int    `yaml:"iterations"`
+	StartupDelay  string `yaml:"startup_delay"`
+}
+
 type Scenario struct {
-	Version     string    `yaml:"version"`
-	Scenario    string    `yaml:"scenario"`
-	Concurrency int       `yaml:"concurrency"`
-	Duration    string    `yaml:"duration"`
-	RampUp      string    `yaml:"ramp_up,omitempty"` // opcional
-	Requests    []Request `yaml:"requests"`
+	Name     string    `yaml:"name"`
+	Profile  Profile   `yaml:"profile"`
+	Requests []Request `yaml:"requests"`
+}
+
+type ScenarioFile struct {
+	Scenarios []Scenario `yaml:"scenarios"`
 }
 
 // -------------------------------------------------------------
-// Eventos en vivo (para SSE/WebSocket)
+// Eventos en vivo (para SSE / WebSocket)
 // -------------------------------------------------------------
 
 type Event struct {
 	Timestamp   time.Time `json:"ts"`
-	Name        string    `json:"name"`        // etiqueta legible ("METHOD PATH" o "RAMP_PROGRESS")
+	Name        string    `json:"name"`
 	Method      string    `json:"method"`
 	Path        string    `json:"path"`
-	Status      int       `json:"status"`      // HTTP status (0 si falló antes)
-	LatencyMs   float64   `json:"latency_ms"`  // en ms
+	Status      int       `json:"status"`
+	LatencyMs   float64   `json:"latency_ms"`
 	Err         string    `json:"err,omitempty"`
-	Concurrency int       `json:"concurrency"` // concurrencia ACTUAL al momento del evento
+	Concurrency int       `json:"concurrency"`
 }
 
 // -------------------------------------------------------------
@@ -66,18 +76,18 @@ type requestStat struct {
 // API pública
 // -------------------------------------------------------------
 
-// Run: versión clásica (sin eventos en vivo)
+// Run: versión clásica (sin eventos)
 func Run(path string) error {
 	return runInternal(path, nil)
 }
 
-// RunWithEvents: igual que Run pero emite un Event por request completado.
+// RunWithEvents: igual que Run pero emite un Event por request completado
 func RunWithEvents(path string, events chan<- Event) error {
 	return runInternal(path, events)
 }
 
 // -------------------------------------------------------------
-// Implementación compartida
+// Implementación principal
 // -------------------------------------------------------------
 
 func runInternal(path string, events chan<- Event) error {
@@ -86,29 +96,32 @@ func runInternal(path string, events chan<- Event) error {
 		return fmt.Errorf("cannot read YAML file: %v", err)
 	}
 
-	var scenario Scenario
-	if err := yaml.Unmarshal(data, &scenario); err != nil {
+	var file ScenarioFile
+	if err := yaml.Unmarshal(data, &file); err != nil {
 		return fmt.Errorf("invalid YAML format: %v", err)
 	}
 
-	fmt.Printf("🚀 Running scenario: %s\n", scenario.Scenario)
-	fmt.Printf("Concurrency: %d | Duration: %s\n", scenario.Concurrency, scenario.Duration)
-	var rampUp time.Duration
-	if scenario.RampUp != "" {
-		fmt.Printf("Ramp-up: %s\n", scenario.RampUp)
-		ru, err := time.ParseDuration(scenario.RampUp)
-		if err != nil {
-			return fmt.Errorf("invalid ramp_up: %v", err)
-		}
-		if ru < 0 {
-			return fmt.Errorf("invalid ramp_up: must be >= 0")
-		}
-		rampUp = ru
+	if len(file.Scenarios) == 0 {
+		return fmt.Errorf("no scenarios found in YAML")
 	}
 
-	duration, err := time.ParseDuration(scenario.Duration)
+	scenario := file.Scenarios[0]
+	profile := scenario.Profile
+
+	fmt.Printf("🚀 Running scenario: %s\n", scenario.Name)
+	fmt.Printf("Concurrency: %d | Duration: %s | Ramp-up: %s\n",
+		profile.Concurrency, profile.Duration, profile.RampUp)
+
+	duration, err := time.ParseDuration(profile.Duration)
 	if err != nil {
 		return fmt.Errorf("invalid duration: %v", err)
+	}
+
+	rampUp := time.Duration(0)
+	if profile.RampUp != "" {
+		if ru, err := time.ParseDuration(profile.RampUp); err == nil {
+			rampUp = ru
+		}
 	}
 
 	start := time.Now()
@@ -126,26 +139,23 @@ func runInternal(path string, events chan<- Event) error {
 
 	// Cálculo del escalón entre workers para el ramp-up
 	var step time.Duration
-	if rampUp > 0 && scenario.Concurrency > 0 {
-		step = rampUp / time.Duration(scenario.Concurrency)
+	if rampUp > 0 && profile.Concurrency > 0 {
+		step = rampUp / time.Duration(profile.Concurrency)
 	}
 
 	var wg sync.WaitGroup
-
-	// 🔢 Concurrencia actual (usuarios activos). Usamos atomic para seguridad en concurrencia.
 	var activeUsers int32 = 0
 
-	for i := 0; i < scenario.Concurrency; i++ {
+	for i := 0; i < profile.Concurrency; i++ {
 		wg.Add(1)
 		go func(workerIdx int) {
 			defer wg.Done()
 
-			// Espera escalonada (ramp-up)
+			// Ramp-up escalonado
 			if step > 0 {
 				time.Sleep(step * time.Duration(workerIdx))
 			}
 
-			// Al entrar un worker, incrementamos concurrencia y emitimos evento de progreso
 			cur := atomic.AddInt32(&activeUsers, 1)
 			if events != nil {
 				events <- Event{
@@ -153,8 +163,6 @@ func runInternal(path string, events chan<- Event) error {
 					Name:        "RAMP_PROGRESS",
 					Method:      "SYSTEM",
 					Path:        fmt.Sprintf("Worker #%d started", workerIdx+1),
-					Status:      0,
-					LatencyMs:   0,
 					Concurrency: int(cur),
 				}
 			}
@@ -221,7 +229,6 @@ func runInternal(path string, events chan<- Event) error {
 							path:    reqCfg.Path,
 							status:  resp.StatusCode,
 							latency: latency,
-							err:     nil,
 						}
 					}
 				}
@@ -229,18 +236,14 @@ func runInternal(path string, events chan<- Event) error {
 		}(i)
 	}
 
-	// Cierre del colector
 	go func() {
 		wg.Wait()
 		close(results)
 	}()
 
-	// Consume resultados: actualiza stats y, si corresponde, emite eventos
+	// Consumo de resultados
 	for r := range results {
-		// concurrencia actual al momento del evento
 		curConc := int(atomic.LoadInt32(&activeUsers))
-
-		// evento en vivo
 		if events != nil {
 			ev := Event{
 				Timestamp:   time.Now(),
@@ -257,11 +260,9 @@ func runInternal(path string, events chan<- Event) error {
 			select {
 			case events <- ev:
 			default:
-				// si el canal está lleno, no bloqueamos
 			}
 		}
 
-		// stats agregadas
 		stat, ok := stats[r.name]
 		if !ok {
 			stat = &requestStat{name: r.name}
@@ -277,7 +278,7 @@ func runInternal(path string, events chan<- Event) error {
 }
 
 // -------------------------------------------------------------
-// Resumen e impresiones
+// Resumen e impresión
 // -------------------------------------------------------------
 
 func summarize(stats map[string]*requestStat) error {
@@ -294,7 +295,6 @@ func summarize(stats map[string]*requestStat) error {
 	fmt.Printf("%-30s %-10s %-10s %-10s %-10s %-10s %-10s\n",
 		"Request", "Count", "Fails", "Err(%)", "Avg(ms)", "P90(ms)", "P95(ms)")
 
-	// orden estable por nombre para salidas deterministas
 	names := make([]string, 0, len(stats))
 	for k := range stats {
 		names = append(names, k)

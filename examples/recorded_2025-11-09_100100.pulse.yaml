@@ -1,0 +1,85 @@
+scenarios:
+  - name: recorded_session
+    profile:
+      concurrency: 1
+      duration: 30s
+      iterations: 1
+      ramp_down: ""
+      ramp_up: 10s
+      startup_delay: 0s
+    requests:
+      - body: ""
+        headers:
+          Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+          Accept-Encoding: gzip, deflate
+          Accept-Language: en-US,en;q=0.5
+          Connection: keep-alive
+          Priority: u=0, i
+          Referer: http://www.testingyes.com/demo/index.php?main_page=checkout_success
+          Upgrade-Insecure-Requests: "1"
+          User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+        host: www.testingyes.com
+        method: GET
+        name: 01_GET_www.testingyes.com
+        path: /demo/
+        protocol: http
+      - body: ""
+        headers:
+          Accept: '*/*'
+          Accept-Encoding: gzip, deflate
+          Accept-Language: en-US,en;q=0.5
+          Connection: keep-alive
+          If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+          Priority: u=2
+          Referer: http://www.testingyes.com/demo/
+          User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+        host: www.testingyes.com
+        method: GET
+        name: 02_GET_www.testingyes.com
+        path: /demo/includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js
+        protocol: http
+      - body: ""
+        headers:
+          Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+          Accept-Encoding: gzip, deflate
+          Accept-Language: en-US,en;q=0.5
+          Connection: keep-alive
+          Priority: u=0, i
+          Referer: http://www.testingyes.com/demo/
+          Upgrade-Insecure-Requests: "1"
+          User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+        host: www.testingyes.com
+        method: GET
+        name: 03_GET_www.testingyes.com
+        path: /demo/index.php?main_page=product_info&cPath=2&products_id=2
+        protocol: http
+      - body: ""
+        headers:
+          Accept: '*/*'
+          Accept-Encoding: gzip, deflate
+          Accept-Language: en-US,en;q=0.5
+          Connection: keep-alive
+          If-Modified-Since: Wed, 17 Jul 2019 00:18:58 GMT
+          Priority: u=2
+          Referer: http://www.testingyes.com/demo/index.php?main_page=product_info&cPath=2&products_id=2
+          User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+        host: www.testingyes.com
+        method: GET
+        name: 04_GET_www.testingyes.com
+        path: /demo/includes/modules/pages/product_info/jscript_textarea_counter.js
+        protocol: http
+      - body: ""
+        headers:
+          Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+          Accept-Encoding: gzip, deflate
+          Accept-Language: en-US,en;q=0.5
+          Connection: keep-alive
+          Priority: u=0, i
+          Referer: http://www.testingyes.com/demo/index.php?main_page=product_info&cPath=2&products_id=2
+          Upgrade-Insecure-Requests: "1"
+          User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+        host: www.testingyes.com
+        method: GET
+        name: 05_GET_www.testingyes.com
+        path: /demo/index.php?main_page=product_info&products_id=4
+        protocol: http

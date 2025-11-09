@@ -29,7 +29,7 @@ type RecordedEvent struct {
 	Time     string            `json:"time"`
 	Headers  map[string]string `json:"headers,omitempty"`
 	Body     string            `json:"body,omitempty"`
-	Response string            `json:"response,omitempty"` // solo para la UI
+	Response string            `json:"response,omitempty"`
 	Proto    string            `json:"proto,omitempty"`
 	Host     string            `json:"host,omitempty"`
 	Port     string            `json:"port,omitempty"`
@@ -49,7 +49,6 @@ type Recorder struct {
 	Events  chan RecordedEvent
 }
 
-// New crea una nueva instancia del Recorder
 func New(addr, outDir string) *Recorder {
 	return &Recorder{
 		Addr:    addr,
@@ -86,8 +85,7 @@ func (r *Recorder) Start() error {
 		log.Println("[RECORDER] 🧩 Stop signal received — writing YAML output...")
 	}
 
-	// Asegura que todo el tráfico pendiente se termine antes de guardar
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second) // Espera para capturar tráfico pendiente
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -102,7 +100,6 @@ func (r *Recorder) Start() error {
 	return nil
 }
 
-// Stop detiene el recorder
 func (r *Recorder) Stop() {
 	select {
 	case <-r.stopCh:
@@ -247,7 +244,7 @@ func extractPort(host string) string {
 }
 
 // -------------------------------------------------------------
-// writeYAML — genera archivo Pulse YAML limpio y ordenado
+// writeYAML — genera archivo Pulse YAML con estructura extendida
 // -------------------------------------------------------------
 func (r *Recorder) writeYAML() error {
 	r.mu.Lock()
@@ -260,13 +257,7 @@ func (r *Recorder) writeYAML() error {
 		return nil
 	}
 
-	out := map[string]interface{}{
-		"version":     "1.0",
-		"scenario":    "Recorded Session",
-		"concurrency": 1,
-		"duration":    "10s",
-	}
-
+	// requests del escenario
 	var requests []map[string]interface{}
 
 	for i, rec := range records {
@@ -293,7 +284,7 @@ func (r *Recorder) writeYAML() error {
 			"host":     rec.Host,
 			"path":     path,
 			"headers":  cleanHeaders,
-			"body":     rec.Body, // ✅ corregido: ya no usa yaml.Node
+			"body":     rec.Body,
 		}
 
 		if rec.Note != "" {
@@ -303,12 +294,29 @@ func (r *Recorder) writeYAML() error {
 		requests = append(requests, req)
 	}
 
-	out["requests"] = requests
+	// estructura extendida del YAML final
+	out := map[string]interface{}{
+		"scenarios": []map[string]interface{}{
+			{
+				"name": "recorded_session",
+				"profile": map[string]interface{}{
+					"concurrency":   1,
+					"ramp_up":       "10s",
+					"duration":      "30s",
+					"ramp_down":     "",
+					"iterations":    1,
+					"startup_delay": "0s",
+				},
+				"requests": requests,
+			},
+		},
+	}
 
 	if r.OutDir == "" {
 		r.OutDir = "."
 	}
 	_ = os.MkdirAll(r.OutDir, 0755)
+
 	filename := filepath.Join(r.OutDir, fmt.Sprintf("recorded_%s.pulse.yaml", time.Now().Format("2006-01-02_150405")))
 	f, err := os.Create(filename)
 	if err != nil {

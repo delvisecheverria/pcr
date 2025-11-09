@@ -15,81 +15,92 @@
     <h1>⚡ Pulse Web UI</h1>
   </header>
 
+  <!-- 🔹 Tabs Navigation -->
+  <div class="tabs" style="display:flex; gap:10px; padding:10px; border-bottom:1px solid #ddd;">
+    <button id="tab-recorder" class="tab active" style="padding:8px 16px; border-radius:6px; border:1px solid #007bff; background:#007bff; color:#fff; cursor:pointer;">
+      🎙️ Recorder
+    </button>
+    <button id="tab-viewer" class="tab" style="padding:8px 16px; border-radius:6px; border:1px solid #ccc; background:#f8f8f8; color:#333; cursor:pointer;">
+      📄 YAML Viewer
+    </button>
+  </div>
+
   <main>
-    <!-- 🎛 Toolbar -->
-    <section class="toolbar">
-      <button id="start" class="primary">▶️ Start Recorder</button>
-      <button id="stop" class="danger" disabled>🛑 Stop Recorder</button>
-      <button id="status" class="secondary">📡 Check Status</button>
-    </section>
+    <!-- ================= RECORDER PANEL ================= -->
+    <section id="panel-recorder" class="tab-panel" style="display:block;">
+      <!-- 🎛 Toolbar -->
+      <section class="toolbar">
+        <button id="start" class="primary">▶️ Start Recorder</button>
+        <button id="stop" class="danger" disabled>🛑 Stop Recorder</button>
+        <button id="status" class="secondary">📡 Check Status</button>
+      </section>
 
-    <!-- 🟢 Status -->
-    <div id="status-bar">
-      <span class="status-indicator" id="indicator"></span>
-      <span id="status-text">Idle</span>
-    </div>
+      <!-- 🟢 Status -->
+      <div id="status-bar">
+        <span class="status-indicator" id="indicator"></span>
+        <span id="status-text">Idle</span>
+      </div>
 
-    <!-- 📡 Recorded Requests -->
-    <section id="recorded-requests">
-      <h2>📋 Recorded Requests</h2>
+      <!-- 📡 Recorded Requests -->
+      <section id="recorded-requests">
+        <h2>📋 Recorded Requests</h2>
+        <div class="requests-container">
+          <div id="requests-list" class="requests-list"></div>
 
-      <!-- Split view / grid container -->
-      <div class="requests-container">
-        <!-- Left side: list -->
-        <div id="requests-list" class="requests-list"></div>
+          <div id="request-detail" class="request-detail hidden">
+            <div class="request-header">
+              <div><strong>Protocol:</strong> <span id="req-protocol">-</span></div>
+              <div><strong>Server:</strong> <span id="req-server">-</span></div>
+              <div><strong>Port:</strong> <span id="req-port">-</span></div>
+              <div><strong>Method:</strong> <span id="req-method">-</span></div>
+              <div><strong>Path:</strong> <span id="req-path">-</span></div>
+            </div>
 
-        <!-- Right side: details -->
-        <div id="request-detail" class="request-detail hidden">
-          <!-- Encabezado del request -->
-          <div class="request-header">
-            <div><strong>Protocol:</strong> <span id="req-protocol">-</span></div>
-            <div><strong>Server:</strong> <span id="req-server">-</span></div>
-            <div><strong>Port:</strong> <span id="req-port">-</span></div>
-            <div><strong>Method:</strong> <span id="req-method">-</span></div>
-            <div><strong>Path:</strong> <span id="req-path">-</span></div>
+            <div class="tabs">
+              <button class="tab active" data-tab="headers">Headers</button>
+              <button class="tab" data-tab="body">Body</button>
+              <button class="tab" data-tab="response">Response</button>
+              <button class="tab" data-tab="meta">Meta</button>
+            </div>
+
+            <pre class="tab-content" id="headers"></pre>
+            <pre class="tab-content hidden" id="body"></pre>
+            <pre class="tab-content hidden" id="response"></pre>
+            <pre class="tab-content hidden" id="meta"></pre>
           </div>
+        </div>
+      </section>
 
-          <!-- Tabs -->
-          <div class="tabs">
-            <button class="tab active" data-tab="headers">Headers</button>
-            <button class="tab" data-tab="body">Body</button>
-            <button class="tab" data-tab="response">Response</button>
-            <button class="tab" data-tab="meta">Meta</button>
+      <!-- 🧠 Log Console -->
+      <section id="logs">
+        <h2>🧠 Log Console</h2>
+        <pre id="log">[--] Pulse UI initializing...\n</pre>
+      </section>
+
+      <!-- 💾 Saved Recordings -->
+      <section id="recordings">
+        <h2>💾 Saved Recordings</h2>
+        <button id="refresh-recordings" class="secondary">🔄 Refresh List</button>
+        <ul id="recordings-list"></ul>
+      </section>
+
+      <!-- 🧾 YAML Preview Modal -->
+      <div id="yaml-modal" class="modal hidden">
+        <div class="modal-content">
+          <button id="close-modal" class="close-btn">✖</button>
+          <h3 id="yaml-title">YAML Preview</h3>
+          <div class="modal-actions">
+            <button id="download-yaml" class="download-btn">⬇️ Download</button>
           </div>
-
-          <!-- Contenido de tabs -->
-          <pre class="tab-content" id="headers"></pre>
-          <pre class="tab-content hidden" id="body"></pre>
-          <pre class="tab-content hidden" id="response"></pre>
-          <pre class="tab-content hidden" id="meta"></pre>
+          <pre id="yaml-content">Loading...</pre>
         </div>
       </div>
     </section>
 
-    <!-- 🧠 Log Console -->
-    <section id="logs">
-      <h2>🧠 Log Console</h2>
-      <pre id="log">[--] Pulse UI initializing...\n</pre>
+    <!-- ================= YAML VIEWER PANEL ================= -->
+    <section id="panel-viewer" class="tab-panel" style="display:none;">
+      <iframe src="yaml-viewer.html" frameborder="0" style="width:100%; height:calc(100vh - 160px);"></iframe>
     </section>
-
-    <!-- 💾 Saved Recordings -->
-    <section id="recordings">
-      <h2>💾 Saved Recordings</h2>
-      <button id="refresh-recordings" class="secondary">🔄 Refresh List</button>
-      <ul id="recordings-list"></ul>
-    </section>
-
-    <!-- 🧾 YAML Preview Modal -->
-    <div id="yaml-modal" class="modal hidden">
-      <div class="modal-content">
-        <button id="close-modal" class="close-btn">✖</button>
-        <h3 id="yaml-title">YAML Preview</h3>
-        <div class="modal-actions">
-          <button id="download-yaml" class="download-btn">⬇️ Download</button>
-        </div>
-        <pre id="yaml-content">Loading...</pre>
-      </div>
-    </div>
   </main>
 
   <footer>
@@ -105,23 +116,46 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
 
   <script>
-    hljs.configure({ ignoreUnescapedHTML: true });
+    // Tab switching logic
+    const tabRecorder = document.getElementById('tab-recorder');
+    const tabViewer = document.getElementById('tab-viewer');
+    const panelRecorder = document.getElementById('panel-recorder');
+    const panelViewer = document.getElementById('panel-viewer');
 
-    // Sincroniza el tema de highlight.js con el modo oscuro
+    function activateTab(tab) {
+      if (tab === 'recorder') {
+        tabRecorder.style.background = '#007bff';
+        tabRecorder.style.color = '#fff';
+        tabViewer.style.background = '#f8f8f8';
+        tabViewer.style.color = '#333';
+        panelRecorder.style.display = 'block';
+        panelViewer.style.display = 'none';
+      } else {
+        tabViewer.style.background = '#007bff';
+        tabViewer.style.color = '#fff';
+        tabRecorder.style.background = '#f8f8f8';
+        tabRecorder.style.color = '#333';
+        panelRecorder.style.display = 'none';
+        panelViewer.style.display = 'block';
+      }
+    }
+
+    tabRecorder.onclick = () => activateTab('recorder');
+    tabViewer.onclick = () => activateTab('viewer');
+
+    // highlight.js theme sync
+    hljs.configure({ ignoreUnescapedHTML: true });
     (function syncHljsTheme() {
       const themeLink = document.getElementById('hljs-theme');
       const toggle = document.getElementById('theme-toggle');
-
       function applyTheme(isDark) {
         themeLink.href = isDark
           ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
           : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
       }
-
       const isDark = localStorage.getItem('pulse-theme') === 'dark';
       toggle.checked = isDark;
       applyTheme(isDark);
-
       toggle.addEventListener('change', (e) => {
         applyTheme(e.target.checked);
         localStorage.setItem('pulse-theme', e.target.checked ? 'dark' : 'light');

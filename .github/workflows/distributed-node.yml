@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [1, 2, 3, 4]
+        node: [1, 2]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -20,5 +20,5 @@ jobs:
         env:
           REPORT_URL: ${{ secrets.REPORT_URL }}
         run: |
-          echo "🏁 Starting node ${{ matrix.node }} of 4"
-          go run ./cmd/worker/main.go -yaml "uploads/totest.yaml" -node ${{ matrix.node }} -total 4
+          echo "🏁 Starting node ${{ matrix.node }} of 2"
+          go run ./cmd/worker/main.go -yaml "uploads/totest.yaml" -node ${{ matrix.node }} -total 2
